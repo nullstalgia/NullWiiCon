@@ -3,10 +3,8 @@
 #include "Joystick.h"
 #define Serial Serial1
 #include <NintendoExtensionCtrl.h>
-#include <NullWiiCon_Options.h>
 
 ClassicController classic;
-NullWiiCon_Options options(6, 32, 100, 1000, 1000, 100);
 
 bool buttonStartBefore;
 bool buttonSelectBefore;
@@ -62,6 +60,13 @@ byte buttonStatus[18];
 #define LEFT_CLICK 16
 #define RIGHT_CLICK 17
 
+#define DIP1 13
+#define DIP2 5
+#define DIP3 10
+#define DIP4 9
+#define DIP5 8
+#define DIP6 6
+
 bool SNES_PAD = false;
 bool SNES_DPAD = false;
 bool SNES_LSTICK = false;
@@ -74,19 +79,13 @@ bool HOME_CAP_EN = false;
 #define R_MIN 4
 #define R_MAX 28
 
-// BumperMode mode = BUMPER_TO_BUMPER;
+//BumperMode mode = BUMPER_TO_BUMPER;
 bool have_switched_mode = false;
 
 int LeftX = 128;
 int LeftY = 128;
 int RightX = 128;
 int RightY = 128;
-
-
-bool current_select;
-bool previous_select;
-unsigned long select_start_hold;
-bool simulate_select;
 
 void checkModeChange() {
   /*
@@ -111,32 +110,36 @@ void checkModeChange() {
 }
 
 void setupPins() {
+  pinMode(DIP1, INPUT_PULLUP);
+  pinMode(DIP2, INPUT_PULLUP);
+  pinMode(DIP3, INPUT_PULLUP);
+  pinMode(DIP4, INPUT_PULLUP);
+  pinMode(DIP5, INPUT_PULLUP);
+  pinMode(DIP6, INPUT_PULLUP);
   // RX LED - PB0
   DDRB |= (1 << 0);
   // TX LED
   DDRD |= (1 << 5);
-  // PORTD ^= (1 << (5));
+  //PORTD ^= (1 << (5));
 }
 void setup() {
   Serial1.begin(115200);
   classic.begin();
-  options.begin();
 
   while (!classic.connect()) {
     Serial1.println("Classic Controller not detected!");
     delay(1000);
   }
 
-  if (classic.isNESThirdParty()) { // Uh oh, looks like your controller isn't
-    // genuine?
-    classic.setRequestSize(
-      8); // Requires 8 or more bytes for third party controllers
+  if (classic.isNESThirdParty()) {  // Uh oh, looks like your controller isn't genuine?
+    classic.setRequestSize(8);  // Requires 8 or more bytes for third party controllers
   }
 
   setupPins();
   SetupHardware();
   GlobalInterruptEnable();
 }
+
 
 void loop() {
   dipRead();
@@ -148,160 +151,133 @@ void loop() {
   USB_USBTask();
 }
 
-void buttonRead() {
-  boolean success = classic.update(); // Get new data from the controller
+void buttonRead()
+{
+  boolean success = classic.update();  // Get new data from the controller
+
 
   if (success) {
     classic.fixNESThirdPartyData();
-    options.menu_check(classic);
 
     LeftX = 128;
     LeftY = 128;
     RightX = 128;
     RightY = 128;
-    if (!options.in_menu) {
-      if (SNES_PAD) {
-        if (SNES_DPAD) {
-          buttonStatus[BUTTONUP] = classic.dpadUp();
-          buttonStatus[BUTTONDOWN] = classic.dpadDown();
-          buttonStatus[BUTTONLEFT] = classic.dpadLeft();
-          buttonStatus[BUTTONRIGHT] = classic.dpadRight();
-        } else {
-          buttonStatus[BUTTONUP] = false;
-          buttonStatus[BUTTONDOWN] = false;
-          buttonStatus[BUTTONLEFT] = false;
-          buttonStatus[BUTTONRIGHT] = false;
-        }
 
-        if (SNES_LSTICK) {
-          if (classic.dpadUp()) {
-            LeftY -= 127;
-          }
-          if (classic.dpadDown()) {
-            LeftY += 127;
-          }
-          if (classic.dpadLeft()) {
-            LeftX -= 127;
-          }
-          if (classic.dpadRight()) {
-            LeftX += 127;
-          }
-        }
-
-        if (options.peek_option == 0) {
-          if (SNES_L_R) {
-            buttonStatus[BUTTONLB] = classic.buttonL();
-            buttonStatus[BUTTONRB] = classic.buttonR();
-          } else {
-            buttonStatus[BUTTONLB] = false;
-            buttonStatus[BUTTONRB] = false;
-          }
-
-          if (SNES_ZL_ZR) {
-            buttonStatus[BUTTONZL] = classic.buttonL();
-            buttonStatus[BUTTONZR] = classic.buttonR();
-          } else {
-            buttonStatus[BUTTONZL] = false;
-            buttonStatus[BUTTONZR] = false;
-          }
-        } else if (options.peek_option == 1) {
-          buttonStatus[BUTTONLB] = classic.buttonL();
-          buttonStatus[BUTTONRB] = classic.buttonR();
-          if (classic.buttonSelect()) {
-            buttonStatus[BUTTONZL] = classic.buttonL();
-            buttonStatus[BUTTONZR] = classic.buttonR();
-          } else {
-            buttonStatus[BUTTONZL] = false;
-            buttonStatus[BUTTONZR] = false;
-          }
-        } else if (options.peek_option == 2) {
-          buttonStatus[BUTTONZL] = classic.buttonL();
-          buttonStatus[BUTTONZR] = classic.buttonR();
-          if (classic.buttonSelect()) {
-            buttonStatus[BUTTONLB] = classic.buttonL();
-            buttonStatus[BUTTONRB] = classic.buttonR();
-          } else {
-            buttonStatus[BUTTONLB] = false;
-            buttonStatus[BUTTONRB] = false;
-          }
-        }
-
-        
-
-        // buttonStatus[BUTTONZL] = classic.buttonL();
-
-        // buttonStatus[BUTTONZR] = classic.buttonR();
-
-      } else {
+    if (SNES_PAD) {
+      if (SNES_DPAD) {
         buttonStatus[BUTTONUP] = classic.dpadUp();
         buttonStatus[BUTTONDOWN] = classic.dpadDown();
         buttonStatus[BUTTONLEFT] = classic.dpadLeft();
         buttonStatus[BUTTONRIGHT] = classic.dpadRight();
-
-        LeftX = map(classic.leftJoyX(), L_MIN, L_MAX, 0, 254);
-        LeftY = map(classic.leftJoyY(), L_MIN, L_MAX, 254, 0);
-        RightX = map(classic.rightJoyX(), R_MIN, R_MAX, 0, 254);
-        RightY = map(classic.rightJoyY(), R_MIN, R_MAX, 254, 0);
-
-        buttonStatus[BUTTONLB] = classic.buttonL();
-        buttonStatus[BUTTONRB] = classic.buttonR();
-        buttonStatus[BUTTONZL] = classic.buttonZL();
-        buttonStatus[BUTTONZR] = classic.buttonZR();
-      }
-
-      buttonStatus[BUTTONSTART] = classic.buttonStart();
-      buttonStatus[BUTTONSELECT] = classic.buttonSelect();
-      buttonStatus[BUTTONHOME] = false;
-      buttonStatus[BUTTONCAPTURE] = false;
-
-
-      if (!options.western_layout) {
-        buttonStatus[BUTTONA] = classic.buttonA();
-        buttonStatus[BUTTONB] = classic.buttonB();
-        buttonStatus[BUTTONX] = classic.buttonX();
-        buttonStatus[BUTTONY] = classic.buttonY();
       } else {
-        buttonStatus[BUTTONB] = classic.buttonA();
-        buttonStatus[BUTTONA] = classic.buttonB();
-        buttonStatus[BUTTONY] = classic.buttonX();
-        buttonStatus[BUTTONX] = classic.buttonY();
+        buttonStatus[BUTTONUP] = false;
+        buttonStatus[BUTTONDOWN] = false;
+        buttonStatus[BUTTONLEFT] = false;
+        buttonStatus[BUTTONRIGHT] = false;
       }
 
-      buttonStatus[BUTTONSELECT] = options.peek_work(classic);
-
-      if (HOME_CAP_EN) {
-        if (classic.dpadDown() && classic.buttonSelect()) {
-          buttonStatus[BUTTONSTART] = false;
-          buttonStatus[BUTTONSELECT] = false;
-          buttonStatus[BUTTONHOME] = true;
-          buttonStatus[BUTTONCAPTURE] = false;
-
-          buttonStatus[BUTTONDOWN] = false;
-        } else if (classic.dpadUp() && classic.buttonStart()) {
-          buttonStatus[BUTTONSTART] = false;
-          buttonStatus[BUTTONSELECT] = false;
-          buttonStatus[BUTTONHOME] = false;
-          buttonStatus[BUTTONCAPTURE] = true;
-
-          buttonStatus[BUTTONUP] = false;
+      if (SNES_LSTICK) {
+        if (classic.dpadUp()) {
+          LeftY -= 127;
+        }
+        if (classic.dpadDown()) {
+          LeftY += 127;
+        }
+        if (classic.dpadLeft()) {
+          LeftX -= 127;
+        }
+        if (classic.dpadRight()) {
+          LeftX += 127;
         }
       }
 
-      
 
-      if (classic.buttonHome()) {
-        buttonStatus[BUTTONHOME] = true;
+
+
+
+
+      if (SNES_L_R) {
+        buttonStatus[BUTTONLB] = classic.buttonL();
+        buttonStatus[BUTTONRB] = classic.buttonR();
+      } else {
+        buttonStatus[BUTTONLB] = false;
+        buttonStatus[BUTTONRB] = false;
       }
+
+      if (SNES_ZL_ZR) {
+        buttonStatus[BUTTONZL] = classic.buttonL();
+        buttonStatus[BUTTONZR] = classic.buttonR();
+      } else {
+        buttonStatus[BUTTONZL] = false;
+        buttonStatus[BUTTONZR] = false;
+      }
+
+      //buttonStatus[BUTTONZL] = classic.buttonL();
+
+      //buttonStatus[BUTTONZR] = classic.buttonR();
+
+
+
+
+
     } else {
-      for (int i = 0; i < sizeof(buttonStatus); i++) {
-        buttonStatus[i] = false;
+      buttonStatus[BUTTONUP] = classic.dpadUp();
+      buttonStatus[BUTTONDOWN] = classic.dpadDown();
+      buttonStatus[BUTTONLEFT] = classic.dpadLeft();
+      buttonStatus[BUTTONRIGHT] = classic.dpadRight();
+
+      LeftX = map(classic.leftJoyX(), L_MIN, L_MAX, 0, 255);
+      LeftY = map(classic.leftJoyY(), L_MIN, L_MAX, 255, 0);
+      RightX = map(classic.rightJoyX(), R_MIN, R_MAX, 0, 255);
+      RightY = map(classic.rightJoyY(), R_MIN, R_MAX, 255, 0);
+
+      buttonStatus[BUTTONLB] = classic.buttonL();
+      buttonStatus[BUTTONRB] = classic.buttonR();
+      buttonStatus[BUTTONZL] = classic.buttonZL();
+      buttonStatus[BUTTONZR] = classic.buttonZR();
+
+
+    }
+
+    buttonStatus[BUTTONSTART] = classic.buttonStart();
+    buttonStatus[BUTTONSELECT] = classic.buttonSelect();
+    buttonStatus[BUTTONHOME] = false;
+    buttonStatus[BUTTONCAPTURE] = false;
+
+    buttonStatus[BUTTONA] = classic.buttonA();
+    buttonStatus[BUTTONB] = classic.buttonB();
+    buttonStatus[BUTTONX] = classic.buttonX();
+    buttonStatus[BUTTONY] = classic.buttonY();
+
+    if (HOME_CAP_EN) {
+      if (classic.dpadDown() && classic.buttonSelect()) {
+        buttonStatus[BUTTONSTART] = false;
+        buttonStatus[BUTTONSELECT] = false;
+        buttonStatus[BUTTONHOME] = true;
+        buttonStatus[BUTTONCAPTURE] = false;
+
+        buttonStatus[BUTTONDOWN] = false;
+      } else if (classic.dpadUp() && classic.buttonStart()) {
+        buttonStatus[BUTTONSTART] = false;
+        buttonStatus[BUTTONSELECT] = false;
+        buttonStatus[BUTTONHOME] = false;
+        buttonStatus[BUTTONCAPTURE] = true;
+
+        buttonStatus[BUTTONUP] = false;
       }
-      options.menu_work(classic);
+    }
+
+    if (classic.buttonHome()) {
+      buttonStatus[BUTTONHOME] = true;
     }
   } else {
     classic.reconnect();
   }
+
+
 }
+
 
 void processDPAD() {
   ReportData.LX = LeftX;
@@ -311,21 +287,29 @@ void processDPAD() {
 
   if ((buttonStatus[BUTTONUP]) && (buttonStatus[BUTTONRIGHT])) {
     ReportData.HAT = DPAD_UPRIGHT_MASK_ON;
-  } else if ((buttonStatus[BUTTONDOWN]) && (buttonStatus[BUTTONRIGHT])) {
+  }
+  else if ((buttonStatus[BUTTONDOWN]) && (buttonStatus[BUTTONRIGHT])) {
     ReportData.HAT = DPAD_DOWNRIGHT_MASK_ON;
-  } else if ((buttonStatus[BUTTONDOWN]) && (buttonStatus[BUTTONLEFT])) {
+  }
+  else if ((buttonStatus[BUTTONDOWN]) && (buttonStatus[BUTTONLEFT])) {
     ReportData.HAT = DPAD_DOWNLEFT_MASK_ON;
-  } else if ((buttonStatus[BUTTONUP]) && (buttonStatus[BUTTONLEFT])) {
+  }
+  else if ((buttonStatus[BUTTONUP]) && (buttonStatus[BUTTONLEFT])) {
     ReportData.HAT = DPAD_UPLEFT_MASK_ON;
-  } else if (buttonStatus[BUTTONUP]) {
+  }
+  else if (buttonStatus[BUTTONUP]) {
     ReportData.HAT = DPAD_UP_MASK_ON;
-  } else if (buttonStatus[BUTTONDOWN]) {
+  }
+  else if (buttonStatus[BUTTONDOWN]) {
     ReportData.HAT = DPAD_DOWN_MASK_ON;
-  } else if (buttonStatus[BUTTONLEFT]) {
+  }
+  else if (buttonStatus[BUTTONLEFT]) {
     ReportData.HAT = DPAD_LEFT_MASK_ON;
-  } else if (buttonStatus[BUTTONRIGHT]) {
+  }
+  else if (buttonStatus[BUTTONRIGHT]) {
     ReportData.HAT = DPAD_RIGHT_MASK_ON;
-  } else {
+  }
+  else {
     ReportData.HAT = DPAD_NOTHING_MASK_ON;
   }
 }
@@ -336,12 +320,12 @@ void processButtons() {
 }
 
 void dipRead() {
-  SNES_PAD = options.simple_pad;
-  SNES_DPAD = options.simple_dpad;
-  SNES_LSTICK = !options.simple_dpad;
-  SNES_L_R = options.lr_enable;
-  SNES_ZL_ZR = options.zlzr_enable;
-  HOME_CAP_EN = options.home_cap_en;
+  SNES_PAD = !digitalRead(DIP1);
+  SNES_DPAD = !digitalRead(DIP2);
+  SNES_LSTICK = !digitalRead(DIP3);
+  SNES_L_R = !digitalRead(DIP4);
+  SNES_ZL_ZR = !digitalRead(DIP5);
+  HOME_CAP_EN = !digitalRead(DIP6);
 }
 
 void buttonProcessing() {
@@ -353,7 +337,7 @@ void buttonProcessing() {
   }
   if (buttonStatus[BUTTONX]) {
     ReportData.Button |= X_MASK_ON;
-    // ReportData.LY = ly;
+    //ReportData.LY = ly;
   }
   if (buttonStatus[BUTTONY]) {
     ReportData.Button |= Y_MASK_ON;
