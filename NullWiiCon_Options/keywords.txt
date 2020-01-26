@@ -1,0 +1,37 @@
+#######################################
+# Syntax Coloring Map For EasyButton
+#######################################
+
+#######################################
+# Datatypes (KEYWORD1)
+#######################################
+
+NullWiiCon_Options	KEYWORD1
+
+#######################################
+# Methods and Functions (KEYWORD2)
+#######################################
+
+begin	KEYWORD2
+menu_check	KEYWORD2
+flash_amount	KEYWORD2
+flash_option	KEYWORD2
+change_option	KEYWORD2
+menu_work	KEYWORD2
+fill_touched	KEYWORD2
+simple_pad	KEYWORD2
+western_layout	KEYWORD2
+peek_option	KEYWORD2
+lr_enable	KEYWORD2
+zlzr_enable	KEYWORD2
+simple_dpad	KEYWORD2
+in_menu	KEYWORD2
+current_millis	KEYWORD2
+
+#######################################
+# Instances (KEYWORD2)
+#######################################
+
+#######################################
+# Constants (LITERAL1)
+#######################################
