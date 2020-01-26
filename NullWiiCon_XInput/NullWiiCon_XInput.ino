@@ -104,8 +104,8 @@ void loop() {
       }
 
       if (SNES_ZL_ZR) {
-        XInput.setTrigger(TRIGGER_LEFT, classic.buttonZL()  ? 26 : 4);
-        XInput.setTrigger(TRIGGER_RIGHT, classic.buttonZR() ? 26 : 4);
+        XInput.setTrigger(TRIGGER_LEFT, classic.buttonL()  ? 26 : 4);
+        XInput.setTrigger(TRIGGER_RIGHT, classic.buttonR() ? 26 : 4);
       } else {
         XInput.setTrigger(TRIGGER_LEFT, false);
         XInput.setTrigger(TRIGGER_RIGHT, false);
@@ -121,11 +121,11 @@ void loop() {
 
       XInput.setDpad(classic.dpadUp(), classic.dpadDown(), classic.dpadLeft(), classic.dpadRight());
 
-      XInput.setTrigger(TRIGGER_LEFT, classic.buttonZL());
-      XInput.setTrigger(TRIGGER_RIGHT, classic.buttonZR());
+      XInput.setTrigger(TRIGGER_LEFT, classic.buttonZL()  ? 26 : 4);
+      XInput.setTrigger(TRIGGER_RIGHT, classic.buttonZR() ? 26 : 4);
 
-      XInput.setButton(BUTTON_LB, classic.triggerL());
-      XInput.setButton(BUTTON_RB, classic.triggerR());
+      XInput.setButton(BUTTON_LB, classic.buttonL());
+      XInput.setButton(BUTTON_RB, classic.buttonR());
     }
     XInput.setButton(BUTTON_A, classic.buttonB());
     XInput.setButton(BUTTON_B, classic.buttonA());

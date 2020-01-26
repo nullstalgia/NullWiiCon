@@ -74,10 +74,10 @@ bool SNES_L_R = false;
 bool SNES_ZL_ZR = false;
 bool HOME_CAP_EN = false;
 
-#define L_MIN 8
-#define L_MAX 56
-#define R_MIN 4
-#define R_MAX 28
+#define L_MIN 0
+#define L_MAX 63
+#define R_MIN 0
+#define R_MAX 31
 
 //BumperMode mode = BUMPER_TO_BUMPER;
 bool have_switched_mode = false;
@@ -227,10 +227,10 @@ void buttonRead()
       buttonStatus[BUTTONLEFT] = classic.dpadLeft();
       buttonStatus[BUTTONRIGHT] = classic.dpadRight();
 
-      LeftX = map(classic.leftJoyX(), L_MIN, L_MAX, 0, 255);
-      LeftY = map(classic.leftJoyY(), L_MIN, L_MAX, 255, 0);
-      RightX = map(classic.rightJoyX(), R_MIN, R_MAX, 0, 255);
-      RightY = map(classic.rightJoyY(), R_MIN, R_MAX, 255, 0);
+      LeftX = map(classic.leftJoyX(), L_MIN, L_MAX, 0, 254);
+      LeftY = map(classic.leftJoyY(), L_MIN, L_MAX, 254, 0);
+      RightX = map(classic.rightJoyX(), R_MIN, R_MAX, 0, 254);
+      RightY = map(classic.rightJoyY(), R_MIN, R_MAX, 254, 0);
 
       buttonStatus[BUTTONLB] = classic.buttonL();
       buttonStatus[BUTTONRB] = classic.buttonR();
