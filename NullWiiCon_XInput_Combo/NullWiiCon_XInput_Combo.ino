@@ -6,7 +6,7 @@ ClassicController classic;
 
 #define STATUS_LED 6
 
-NullWiiCon_Options options(STATUS_LED, 0, 100, 1000);
+NullWiiCon_Options options(STATUS_LED, 32, 100, 5000, 1000, 100);
 
 #define DIP1 13
 #define DIP2 5

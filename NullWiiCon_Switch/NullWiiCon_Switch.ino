@@ -74,10 +74,10 @@ bool SNES_L_R = false;
 bool SNES_ZL_ZR = false;
 bool HOME_CAP_EN = false;
 
-#define L_MIN 0
-#define L_MAX 63
-#define R_MIN 0
-#define R_MAX 31
+#define L_MIN 8
+#define L_MAX 56
+#define R_MIN 4
+#define R_MAX 28
 
 //BumperMode mode = BUMPER_TO_BUMPER;
 bool have_switched_mode = false;
@@ -227,10 +227,10 @@ void buttonRead()
       buttonStatus[BUTTONLEFT] = classic.dpadLeft();
       buttonStatus[BUTTONRIGHT] = classic.dpadRight();
 
-      LeftX = map(classic.leftJoyX(), L_MIN, L_MAX, 0, 254);
-      LeftY = map(classic.leftJoyY(), L_MIN, L_MAX, 254, 0);
-      RightX = map(classic.rightJoyX(), R_MIN, R_MAX, 0, 254);
-      RightY = map(classic.rightJoyY(), R_MIN, R_MAX, 254, 0);
+      LeftX = map_with_clamp(classic.leftJoyX(), L_MIN, L_MAX, 0, 254);
+      LeftY = map_with_clamp(classic.leftJoyY(), L_MIN, L_MAX, 254, 0);
+      RightX = map_with_clamp(classic.rightJoyX(), R_MIN, R_MAX, 0, 254);
+      RightY = map_with_clamp(classic.rightJoyY(), R_MIN, R_MAX, 254, 0);
 
       buttonStatus[BUTTONLB] = classic.buttonL();
       buttonStatus[BUTTONRB] = classic.buttonR();
@@ -312,6 +312,16 @@ void processDPAD() {
   else {
     ReportData.HAT = DPAD_NOTHING_MASK_ON;
   }
+}
+
+// Stolen from
+// https://github.com/dmadison/NintendoExtensionCtrl/issues/51#issuecomment-578484566
+// Which is from the dmadison xinput lib
+int32_t map_with_clamp(int32_t val, int32_t in_min, int32_t in_max, int32_t out_min, int32_t out_max) {
+  if (val <= in_min) return out_min;  // Out of range -
+  if (val >= in_max) return out_max;  // Out of range +
+  if (in_min == out_min && in_max == out_max) return val;  // Ranges identical
+  return map(val, in_min, in_max, out_min, out_max);
 }
 
 void processButtons() {
