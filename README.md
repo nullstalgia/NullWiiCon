@@ -12,4 +12,11 @@ Later, I used [dmadison's ArduinoXInput](https://github.com/dmadison/ArduinoXInp
 
 ## Todo:
 
-- Use custom USB PID/VID for Bootloader/DirectInput
+- Use custom USB PID/VID for ~~Bootloader~~/DirectInput
+- Add thanks and credits
+- Add dependencies
+- Comments
+- Make RetroArch joypad profile for DirectInput
+- Test custom PID/VID with Switch/XInput/DirectInput modes on all available OSes
+- Add PCB pics
+- https://github.com/MHeironimus/ArduinoJoystickLibrary

@@ -8,7 +8,8 @@ ClassicController classic;
 
 bool buttonStartBefore;
 bool buttonSelectBefore;
-byte buttonStatus[18];
+#define BUTTONCOUNT 18
+byte buttonStatus[BUTTONCOUNT];
 
 /*
   0x4000,
@@ -78,36 +79,24 @@ bool HOME_CAP_EN = false;
 #define L_MAX 56
 #define R_MIN 4
 #define R_MAX 28
+//#define L_MIDDLE 32
+//#define R_MIDDLE 16
+#define MIDDLE_BUFFER 2
+
+uint8_t LX_MIDDLE = 32;
+uint8_t LY_MIDDLE = 32;
+uint8_t RX_MIDDLE = 16;
+uint8_t RY_MIDDLE = 16;
+
 
 //BumperMode mode = BUMPER_TO_BUMPER;
 bool have_switched_mode = false;
 
-int LeftX = 128;
-int LeftY = 128;
-int RightX = 128;
-int RightY = 128;
+uint8_t LeftX = 128;
+uint8_t LeftY = 128;
+uint8_t RightX = 128;
+uint8_t RightY = 128;
 
-void checkModeChange() {
-  /*
-    if (classic.buttonStart() && classic.buttonSelect()) {
-      if (!have_switched_mode) {
-        have_switched_mode = true;
-        switch (mode) {
-          case BUMPER_TO_BUMPER:
-            mode = BUMPER_TO_TRIGGER;
-            break;
-          case BUMPER_TO_TRIGGER:
-            mode = BUMPER_TO_BOTH;
-            break;
-          case BUMPER_TO_BOTH:
-            mode = BUMPER_TO_BUMPER;
-            break;
-        }
-      }
-    } else if (!classic.buttonStart() && !classic.buttonSelect()) {
-      have_switched_mode = false;
-    }*/
-}
 
 void setupPins() {
   pinMode(DIP1, INPUT_PULLUP);
@@ -118,7 +107,7 @@ void setupPins() {
   pinMode(DIP6, INPUT_PULLUP);
   // RX LED - PB0
   DDRB |= (1 << 0);
-  // TX LED
+  // TX LED - PD5
   DDRD |= (1 << 5);
   //PORTD ^= (1 << (5));
 }
@@ -135,6 +124,16 @@ void setup() {
     classic.setRequestSize(8);  // Requires 8 or more bytes for third party controllers
   }
 
+  if (classic.update()) {
+    classic.fixNESThirdPartyData();
+    LX_MIDDLE = classic.leftJoyX();
+    LY_MIDDLE = classic.leftJoyY();
+    RX_MIDDLE = classic.rightJoyX();
+    RY_MIDDLE = classic.rightJoyY();
+  } else {
+    classic.reconnect();
+  }
+
   setupPins();
   SetupHardware();
   GlobalInterruptEnable();
@@ -143,8 +142,8 @@ void setup() {
 
 void loop() {
   dipRead();
+  clearButtons();
   buttonRead();
-  checkModeChange();
   processButtons();
   HID_Task();
   // We also need to run the main USB management task.
@@ -159,22 +158,12 @@ void buttonRead()
   if (success) {
     classic.fixNESThirdPartyData();
 
-    LeftX = 128;
-    LeftY = 128;
-    RightX = 128;
-    RightY = 128;
-
     if (SNES_PAD) {
       if (SNES_DPAD) {
         buttonStatus[BUTTONUP] = classic.dpadUp();
         buttonStatus[BUTTONDOWN] = classic.dpadDown();
         buttonStatus[BUTTONLEFT] = classic.dpadLeft();
         buttonStatus[BUTTONRIGHT] = classic.dpadRight();
-      } else {
-        buttonStatus[BUTTONUP] = false;
-        buttonStatus[BUTTONDOWN] = false;
-        buttonStatus[BUTTONLEFT] = false;
-        buttonStatus[BUTTONRIGHT] = false;
       }
 
       if (SNES_LSTICK) {
@@ -200,24 +189,16 @@ void buttonRead()
       if (SNES_L_R) {
         buttonStatus[BUTTONLB] = classic.buttonL();
         buttonStatus[BUTTONRB] = classic.buttonR();
-      } else {
-        buttonStatus[BUTTONLB] = false;
-        buttonStatus[BUTTONRB] = false;
       }
 
       if (SNES_ZL_ZR) {
         buttonStatus[BUTTONZL] = classic.buttonL();
         buttonStatus[BUTTONZR] = classic.buttonR();
-      } else {
-        buttonStatus[BUTTONZL] = false;
-        buttonStatus[BUTTONZR] = false;
       }
 
       //buttonStatus[BUTTONZL] = classic.buttonL();
 
       //buttonStatus[BUTTONZR] = classic.buttonR();
-
-
 
 
 
@@ -227,10 +208,37 @@ void buttonRead()
       buttonStatus[BUTTONLEFT] = classic.dpadLeft();
       buttonStatus[BUTTONRIGHT] = classic.dpadRight();
 
-      LeftX = map_with_clamp(classic.leftJoyX(), L_MIN, L_MAX, 0, 254);
-      LeftY = map_with_clamp(classic.leftJoyY(), L_MIN, L_MAX, 254, 0);
-      RightX = map_with_clamp(classic.rightJoyX(), R_MIN, R_MAX, 0, 254);
-      RightY = map_with_clamp(classic.rightJoyY(), R_MIN, R_MAX, 254, 0);
+      uint8_t leftJoyX = classic.leftJoyX();
+      uint8_t leftJoyY = classic.leftJoyY();
+      uint8_t rightJoyX = classic.rightJoyX();
+      uint8_t rightJoyY = classic.rightJoyY();
+
+
+      if (leftJoyX <= LX_MIDDLE + MIDDLE_BUFFER && !(leftJoyX < LX_MIDDLE - MIDDLE_BUFFER)) {
+
+      } else {
+        LeftX = map_with_clamp(leftJoyX, L_MIN, L_MAX, 0, 255);
+      }
+      if (leftJoyY <= LY_MIDDLE + MIDDLE_BUFFER && !(leftJoyY < LY_MIDDLE - MIDDLE_BUFFER)) {
+
+      } else {
+        LeftY = map_with_clamp(leftJoyY, L_MIN, L_MAX, 255, 0);
+      }
+
+      if (rightJoyX <= RX_MIDDLE + MIDDLE_BUFFER && !(rightJoyX < RX_MIDDLE - MIDDLE_BUFFER)) {
+
+      } else {
+        RightX = map_with_clamp(rightJoyX, R_MIN, R_MAX, 0, 255);
+      }
+      if (rightJoyY <= RY_MIDDLE + MIDDLE_BUFFER && !(rightJoyY < RY_MIDDLE - MIDDLE_BUFFER)) {
+
+      } else {
+        RightY = map_with_clamp(rightJoyY, R_MIN, R_MAX, 255, 0);
+      }
+
+
+
+
 
       buttonStatus[BUTTONLB] = classic.buttonL();
       buttonStatus[BUTTONRB] = classic.buttonR();
@@ -242,8 +250,6 @@ void buttonRead()
 
     buttonStatus[BUTTONSTART] = classic.buttonStart();
     buttonStatus[BUTTONSELECT] = classic.buttonSelect();
-    buttonStatus[BUTTONHOME] = false;
-    buttonStatus[BUTTONCAPTURE] = false;
 
     buttonStatus[BUTTONA] = classic.buttonA();
     buttonStatus[BUTTONB] = classic.buttonB();
@@ -272,6 +278,7 @@ void buttonRead()
       buttonStatus[BUTTONHOME] = true;
     }
   } else {
+    clearButtons();
     classic.reconnect();
   }
 
@@ -317,16 +324,26 @@ void processDPAD() {
 // Stolen from
 // https://github.com/dmadison/NintendoExtensionCtrl/issues/51#issuecomment-578484566
 // Which is from the dmadison xinput lib
-int32_t map_with_clamp(int32_t val, int32_t in_min, int32_t in_max, int32_t out_min, int32_t out_max) {
+uint8_t map_with_clamp(uint8_t val, uint8_t in_min, uint8_t in_max, uint8_t out_min, uint8_t out_max) {
   if (val <= in_min) return out_min;  // Out of range -
   if (val >= in_max) return out_max;  // Out of range +
-  if (in_min == out_min && in_max == out_max) return val;  // Ranges identical
-  return map(val, in_min, in_max, out_min, out_max);
+  //if (in_min == out_min && in_max == out_max) return val;  // Ranges identical
+  return (val - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
 }
 
 void processButtons() {
   processDPAD();
   buttonProcessing();
+}
+
+void clearButtons() {
+  LeftX = 128;
+  LeftY = 128;
+  RightX = 128;
+  RightY = 128;
+  for (int i = 0; i < BUTTONCOUNT; i++) {
+    buttonStatus[i] = false;
+  }
 }
 
 void dipRead() {
