@@ -12,11 +12,11 @@ Later, I used [dmadison's ArduinoXInput](https://github.com/dmadison/ArduinoXInp
 
 ## Todo:
 
-- Use custom USB PID/VID for ~~Bootloader~~/DirectInput
-- Add thanks and credits
-- Add dependencies
+- ~~Use custom USB PID/VID for Bootloader/DirectInput~~ Done. (But can't use for DirectInput/Switch since Switch ignores it with the custom PID/VID)
+- Add thanks and credits to README
+- Add dependencies to README
 - Comments
-- Make RetroArch joypad profile for DirectInput
-- Test custom PID/VID with Switch/XInput/DirectInput modes on all available OSes
-- Add PCB pics
-- https://github.com/MHeironimus/ArduinoJoystickLibrary
+- ~~Make RetroArch joypad profile for DirectInput~~ [Done.](https://github.com/libretro/retroarch-joypad-autoconfig/pull/623) 
+- ~~Test custom PID/VID with Switch/XInput/DirectInput modes on all available OSes~~ Done. Switch didn't work. Not bothering with XInput for compatibility reasons.
+- Add PCB pics to README
+- ~~https://github.com/MHeironimus/ArduinoJoystickLibrary~~ Not using. Using normal Switch firmware with custom Manu/Prod descriptors.

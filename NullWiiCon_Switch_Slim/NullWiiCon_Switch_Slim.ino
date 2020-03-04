@@ -1,12 +1,15 @@
 #include "LUFAConfig.h"
 #include <LUFA.h>
 #include "Joystick.h"
-#define Serial Serial1
+//#define Serial //Serial1
 #include <NintendoExtensionCtrl.h>
 #include <NullWiiCon_Options.h>
 
 ClassicController classic;
-NullWiiCon_Options options(6, 32, 100, 5000, 1000, 100);
+
+#define CONFIG_LED 8
+#define STATUS_LED 13
+NullWiiCon_Options options(CONFIG_LED, 32, 100, 3000, 1000, 100);
 
 bool buttonStartBefore;
 bool buttonSelectBefore;
@@ -106,13 +109,17 @@ void setupPins() {
   // PORTD ^= (1 << (5));
 }
 void setup() {
-  Serial1.begin(115200);
+  //Serial1.begin(115200);
   classic.begin();
   options.begin();
 
+  pinMode(CONFIG_LED, OUTPUT);
+  pinMode(STATUS_LED, OUTPUT);
+
   while (!classic.connect()) {
-    Serial1.println("Classic Controller not detected!");
+    //Serial1.println("Classic Controller not detected!");
     delay(1000);
+    digitalWrite(STATUS_LED, !digitalRead(STATUS_LED));
   }
 
   if (classic.isNESThirdParty()) { // Uh oh, looks like your controller isn't
@@ -270,7 +277,7 @@ void buttonRead() {
       }
 
       buttonStatus[BUTTONSELECT] = options.peek_work(classic);
-
+      
       if (HOME_CAP_EN) {
         if (classic.dpadDown() && classic.buttonSelect()) {
           buttonStatus[BUTTONSTART] = false;
@@ -302,6 +309,8 @@ void buttonRead() {
     }
   } else {
     classic.reconnect();
+    digitalWrite(STATUS_LED, HIGH);
+    digitalWrite(STATUS_LED, LOW);
   }
 }
 

@@ -66,6 +66,7 @@ byte buttonStatus[BUTTONCOUNT];
 #define DIP3 10
 #define DIP4 9
 #define DIP5 8
+#define DIP6 6
 
 bool SNES_PAD = false;
 bool SNES_DPAD = false;
@@ -103,6 +104,7 @@ void setupPins() {
   pinMode(DIP3, INPUT_PULLUP);
   pinMode(DIP4, INPUT_PULLUP);
   pinMode(DIP5, INPUT_PULLUP);
+  pinMode(DIP6, INPUT_PULLUP);
   // RX LED - PB0
   DDRB |= (1 << 0);
   // TX LED - PD5
@@ -162,7 +164,9 @@ void buttonRead()
         buttonStatus[BUTTONDOWN] = classic.dpadDown();
         buttonStatus[BUTTONLEFT] = classic.dpadLeft();
         buttonStatus[BUTTONRIGHT] = classic.dpadRight();
-      } else {
+      }
+
+      if (SNES_LSTICK) {
         if (classic.dpadUp()) {
           LeftY -= 127;
         }
@@ -345,9 +349,10 @@ void clearButtons() {
 void dipRead() {
   SNES_PAD = !digitalRead(DIP1);
   SNES_DPAD = !digitalRead(DIP2);
-  SNES_L_R = !digitalRead(DIP3);
-  SNES_ZL_ZR = !digitalRead(DIP4);
-  HOME_CAP_EN = !digitalRead(DIP5);
+  SNES_LSTICK = !digitalRead(DIP3);
+  SNES_L_R = !digitalRead(DIP4);
+  SNES_ZL_ZR = !digitalRead(DIP5);
+  HOME_CAP_EN = !digitalRead(DIP6);
 }
 
 void buttonProcessing() {

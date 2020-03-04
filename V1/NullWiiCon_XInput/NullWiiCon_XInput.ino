@@ -9,6 +9,7 @@ ClassicController classic;
 #define DIP3 10
 #define DIP4 9
 #define DIP5 8
+#define DIP6 6
 
 bool SNES_PAD = false;
 bool SNES_DPAD = false;
@@ -157,10 +158,10 @@ void loop() {
 void dipRead() {
   SNES_PAD = !digitalRead(DIP1);
   SNES_DPAD = !digitalRead(DIP2);
-  SNES_LSTICK = !SNES_DPAD;
-  SNES_L_R = !digitalRead(DIP3);
-  SNES_ZL_ZR = !digitalRead(DIP4);
-  HOME_CAP_EN = !digitalRead(DIP5);
+  SNES_LSTICK = !digitalRead(DIP3);
+  SNES_L_R = !digitalRead(DIP4);
+  SNES_ZL_ZR = !digitalRead(DIP5);
+  HOME_CAP_EN = !digitalRead(DIP6);
 }
 
 void setupPins() {
@@ -169,4 +170,5 @@ void setupPins() {
   pinMode(DIP3, INPUT_PULLUP);
   pinMode(DIP4, INPUT_PULLUP);
   pinMode(DIP5, INPUT_PULLUP);
+  pinMode(DIP6, INPUT_PULLUP);
 }

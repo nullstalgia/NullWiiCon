@@ -4,16 +4,10 @@
 
 ClassicController classic;
 
-#define STATUS_LED 6
+#define CONFIG_LED 8
+#define STATUS_LED 13
+NullWiiCon_Options options(CONFIG_LED, 64, 100, 3000, 1000, 100);
 
-NullWiiCon_Options options(STATUS_LED, 32, 100, 5000, 1000, 100);
-
-#define DIP1 13
-#define DIP2 5
-#define DIP3 10
-#define DIP4 9
-#define DIP5 8
-#define DIP6 6
 
 bool SNES_PAD = false;
 bool SNES_DPAD = false;
@@ -72,9 +66,8 @@ void loop() {
   dipRead();
   if (classic.update()) { // Get new data!
     classic.fixNESThirdPartyData();
-    
     options.menu_check(classic);
-    
+
     if (!options.in_menu) {
       if (SNES_PAD) {
         XInput.setRange(JOY_LEFT, 0, 2);
@@ -212,7 +205,7 @@ void loop() {
             }
           } else {
             if (options.current_millis - select_start_hold <=
-                    SELECT_TIME_TO_SIMULATE &&
+                SELECT_TIME_TO_SIMULATE &&
                 !classic.buttonL() && !classic.buttonR()) {
               XInput.setButton(BUTTON_BACK, true);
             } else {
@@ -234,6 +227,8 @@ void loop() {
   } else { // Data is bad :(
     XInput.releaseAll();
     classic.reconnect();
+    digitalWrite(STATUS_LED, HIGH);
+    digitalWrite(STATUS_LED, LOW);
   }
 
   XInput.send();
@@ -248,4 +243,7 @@ void dipRead() {
   HOME_CAP_EN = options.home_cap_en;
 }
 
-void setupPins() {}
+void setupPins() {
+  pinMode(CONFIG_LED, OUTPUT);
+  pinMode(STATUS_LED, OUTPUT);
+}
