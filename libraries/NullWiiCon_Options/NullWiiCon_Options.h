@@ -70,6 +70,7 @@ private:
   bool _current_select;
   bool _previous_select;
   bool _simulate_select;
+  bool _lrzlzr_was_simulated;
   unsigned long _select_start_hold;
   unsigned long _how_long_to_hold;
   unsigned long _previous_millis;
@@ -79,8 +80,23 @@ private:
   uint8_t current_button;
   uint8_t last_button;
   uint8_t changing_button;
-  typedef enum { A, B, UP, DOWN, LEFT, RIGHT, Y, NONE } button_index;
-  typedef enum { PAD, HOME, LAYOUT, DPAD, LR_EN, ZLZR_EN, PEEK } option_index;
+  typedef enum {
+  A, 
+  B, 
+  UP, 
+  DOWN, 
+  LEFT, 
+  RIGHT, 
+  Y, 
+  NONE } button_index;
+  typedef enum {
+  PAD, 
+  HOME, 
+  LAYOUT, 
+  DPAD, 
+  LR_EN, 
+  ZLZR_EN, 
+  PEEK } option_index;
 };
 
 #endif

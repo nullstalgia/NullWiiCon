@@ -201,22 +201,28 @@ bool NullWiiCon_Options::peek_work(ClassicController &controller) {
     //select_output = controller.buttonSelect();
   } else {
     select_output = false;
-    _current_select = controller.buttonSelect() && !controller.buttonL() &&
-                      !controller.buttonR();
+    _current_select = controller.buttonSelect();
+    // && !controller.buttonL() &&
+    //!controller.buttonR();
+    
     if (!_simulate_select) {
       if (_current_select != _previous_select) {
         if (_current_select == true) {
           _select_start_hold = current_millis;
         } else {
-          if (current_millis - _select_start_hold <= _select_delay) {
+          if (current_millis - _select_start_hold <= _select_delay && !_lrzlzr_was_simulated) {
             _simulate_select = true;
             _select_start_hold = current_millis;
           } else {
             select_output = false;
+            _lrzlzr_was_simulated = false;
           }
         }
       } else {
         if (_current_select == true) {
+          if (controller.buttonL() || controller.buttonR()) {
+            _lrzlzr_was_simulated = true;
+          }
           if (current_millis - _select_start_hold >= _select_delay) {
             select_output = true;
           } else {
