@@ -1,0 +1,7 @@
+(fp_lib_table
+  (lib (name otter)(type KiCad)(uri ${KIPRJMOD}/../custom_libs/otter.pretty)(options "")(descr ""))
+  (lib (name Type-C)(type KiCad)(uri ${KIPRJMOD}/../custom_libs/Type-C.pretty)(options "")(descr ""))
+  (lib (name DIP)(type KiCad)(uri ${KIPRJMOD}/../custom_libs/DIP.pretty)(options "")(descr ""))
+  (lib (name Connectors)(type KiCad)(uri ${KIPRJMOD}/../custom_libs/SparkFun/Footprints/Connectors.pretty)(options "")(descr ""))
+  (lib (name Logos)(type KiCad)(uri "${KIPRJMOD}/../Bitmap Conversions/Logos.pretty")(options "")(descr ""))
+)
