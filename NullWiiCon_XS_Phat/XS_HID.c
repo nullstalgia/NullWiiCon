@@ -219,23 +219,23 @@ void generate_report_switch() {
   SwitchReportData.RY = RightY;
 
   // Buttons
-  bit_write(buttonStatus[BUTTONA], SwitchReportData.Button, A_MASK_ON);
-  bit_write(buttonStatus[BUTTONB], SwitchReportData.Button, B_MASK_ON);
-  bit_write(buttonStatus[BUTTONX], SwitchReportData.Button, X_MASK_ON);
-  bit_write(buttonStatus[BUTTONY], SwitchReportData.Button, Y_MASK_ON);
-  bit_write(buttonStatus[BUTTONLB], SwitchReportData.Button, LB_MASK_ON);
-  bit_write(buttonStatus[BUTTONRB], SwitchReportData.Button, RB_MASK_ON);
-  bit_write(buttonStatus[BUTTONZL], SwitchReportData.Button, ZL_MASK_ON);
-  bit_write(buttonStatus[BUTTONZR], SwitchReportData.Button, ZR_MASK_ON);
-  bit_write(buttonStatus[BUTTONSTART], SwitchReportData.Button,
+  bit_writemask(buttonStatus[BUTTONA], SwitchReportData.Button, A_MASK_ON);
+  bit_writemask(buttonStatus[BUTTONB], SwitchReportData.Button, B_MASK_ON);
+  bit_writemask(buttonStatus[BUTTONX], SwitchReportData.Button, X_MASK_ON);
+  bit_writemask(buttonStatus[BUTTONY], SwitchReportData.Button, Y_MASK_ON);
+  bit_writemask(buttonStatus[BUTTONLB], SwitchReportData.Button, LB_MASK_ON);
+  bit_writemask(buttonStatus[BUTTONRB], SwitchReportData.Button, RB_MASK_ON);
+  bit_writemask(buttonStatus[BUTTONZL], SwitchReportData.Button, ZL_MASK_ON);
+  bit_writemask(buttonStatus[BUTTONZR], SwitchReportData.Button, ZR_MASK_ON);
+  bit_writemask(buttonStatus[BUTTONSTART], SwitchReportData.Button,
             START_MASK_ON);
-  bit_write(buttonStatus[BUTTONSELECT], SwitchReportData.Button,
+  bit_writemask(buttonStatus[BUTTONSELECT], SwitchReportData.Button,
             SELECT_MASK_ON);
-  bit_write(buttonStatus[BUTTONHOME], SwitchReportData.Button, HOME_MASK_ON);
-  bit_write(buttonStatus[BUTTONCAPTURE], SwitchReportData.Button,
+  bit_writemask(buttonStatus[BUTTONHOME], SwitchReportData.Button, HOME_MASK_ON);
+  bit_writemask(buttonStatus[BUTTONCAPTURE], SwitchReportData.Button,
             CAPTURE_MASK_ON);
-  bit_write(buttonStatus[BUTTONL3], SwitchReportData.Button, L3_MASK_ON);
-  bit_write(buttonStatus[BUTTONR3], SwitchReportData.Button,
+  bit_writemask(buttonStatus[BUTTONL3], SwitchReportData.Button, L3_MASK_ON);
+  bit_writemask(buttonStatus[BUTTONR3], SwitchReportData.Button,
             R3_MASK_ON);
 }
 

@@ -3,7 +3,8 @@
 
 #define bit_set(p,m) ((p) |= (m))
 #define bit_clear(p,m) ((p) &= ~(m))
-#define bit_write(c,p,m) (c ? bit_set(p,m) : bit_clear(p,m))
+#define bit_writemask(c,p,m) (c ? bit_set(p,m) : bit_clear(p,m))
+#define bit_write(c,p,m) (c ? (p |= (1 << m)) : (p &= !(1 << m)))
 #define bit_check(value, bit) (((value) >> (bit)) & 0x01)
 #define bit_toggle(value, bit) ((value) ^= (1 << bit))
 

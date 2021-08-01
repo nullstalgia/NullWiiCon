@@ -103,6 +103,8 @@ void setupPins() {
   DDRB |= (1 << 0);
   // TX LED - PD5
   DDRD |= (1 << 5);
+  // Status LED - PE6
+  DDRE |= (1 << 6);
 
   //DDRB |= (1 << 3);
   // PORTD ^= (1 << (5));
@@ -129,6 +131,8 @@ void setup() {
   // classic.setHighRes(false, false);
 
   if (classic.update()) {
+    bit_write(0, PORTE, 6);
+    //PORTE &= (1 << 6);
     /*
       uint8_t timesToAverage = 10;
       uint16_t LX;
